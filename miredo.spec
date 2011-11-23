@@ -4,7 +4,7 @@
 
 Name:           miredo
 Version:        1.2.4
-Release:        %mkrel 1
+Release:        2
 Summary:        Tunneling of IPv6 over UDP through NATs
 
 Group:          Networking/Other 
