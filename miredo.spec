@@ -3,14 +3,14 @@
 %define develname %mklibname miredo -d
 
 Name:           miredo
-Version:        1.2.4
-Release:        2
+Version:        1.2.5
+Release:        1
 Summary:        Tunneling of IPv6 over UDP through NATs
 
 Group:          Networking/Other 
 License:        GPLv2+
 URL:            http://www.simphalempin.com/dev/miredo/
-Source0:        http://www.remlab.net/files/miredo/miredo-%{version}.tar.bz2
+Source0:        http://www.remlab.net/files/miredo/miredo-%{version}.tar.xz
 Source1:        miredo-client.init
 Source2:        miredo-server.init
 Patch0:         miredo-config-not-exec
@@ -108,6 +108,10 @@ install -p -m 755 %{SOURCE1} %{buildroot}%{_initrddir}/miredo-client
 install -p -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/miredo-server
 rm -f %{buildroot}%{_libdir}/lib*.la
 touch %{buildroot}%{_sysconfdir}/miredo/miredo-server.conf
+mkdir -p %{buildroot}/lib/systemd/systemd/
+cp %{buildroot}/%{_libdir}/systemd/system/%{name}.service %{buildroot}/lib/systemd/systemd/%{name}.service
+
+rm -f %{buildroot}/%{_libdir}/systemd/system/%{name}.service
 
 
 %pre -n %{libname}
@@ -166,13 +170,13 @@ fi
 %{_sbindir}/miredo-server
 %{_sbindir}/miredo-checkconf
 %{_initrddir}/miredo-server
+/lib/systemd/systemd/miredo.service
 %doc %{_mandir}/man1/teredo-mire*
 %doc %{_mandir}/man?/miredo-server*
 %doc %{_mandir}/man?/miredo-checkconf*
 
 
 %files client
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/miredo/miredo.conf
 %config(noreplace) %{_sysconfdir}/miredo/client-hook
 %{_initrddir}/miredo-client
