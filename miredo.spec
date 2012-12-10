@@ -182,3 +182,19 @@ fi
 %{_initrddir}/miredo-client
 %{_sbindir}/miredo
 %doc %{_mandir}/man?/miredo.*
+
+
+%changelog
+* Sat Mar 03 2012 Alexander Khrukin <akhrukin@mandriva.org> 1.2.5-1
++ Revision: 782059
+- version update 1.2.5
+
+* Wed Nov 23 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.2.4-2
++ Revision: 732977
+- release bump
+- mandriva policy fixes
+
+* Tue Nov 01 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.2.4-1
++ Revision: 709799
+- imported package miredo
+
