@@ -1,200 +1,199 @@
-%define major 4
-%define libname %mklibname miredo %{major}
-%define develname %mklibname miredo -d
+%define major_teredo 5
+%define major_tun6 0
+%define libteredo %mklibname teredo %{major_teredo}
+%define libtun6 %mklibname tun 6 %{major_tun6}
+%define devname %mklibname miredo -d
 
-Name:           miredo
-Version:        1.2.5
-Release:        1
-Summary:        Tunneling of IPv6 over UDP through NATs
+Summary:	Tunneling of IPv6 over UDP through NATs
+Name:		miredo
+Version:	1.2.6
+Release:	1
+License:	GPLv2+
+Group:		Networking/Other
+Url:		http://www.simphalempin.com/dev/miredo/
+Source0:	http://www.remlab.net/files/miredo/miredo-%{version}.tar.xz
+Source1:	miredo-client.service
+Source2:	miredo-server.service
+Patch0:		miredo-config-not-exec
+Patch1:		reread-resolv-before-resolv-ipv4.patch
+Patch2:		miredo-1.2.6-systemd.patch
+BuildRequires:	gettext-devel
+BuildRequires:	libcap-devel
 
-Group:          Networking/Other 
-License:        GPLv2+
-URL:            http://www.simphalempin.com/dev/miredo/
-Source0:        http://www.remlab.net/files/miredo/miredo-%{version}.tar.xz
-Source1:        miredo-client.init
-Source2:        miredo-server.init
-Patch0:         miredo-config-not-exec
-Patch1:         reread-resolv-before-resolv-ipv4.patch
-
-BuildRequires:    libcap-devel 
-
-Requires(pre):    shadow-utils
-Requires(post):   chkconfig, /sbin/ldconfig
-# This is for /sbin/service
-Requires(preun):  chkconfig, initscripts
-Requires(postun): initscripts, /sbin/ldconfig
+Requires(pre):	shadow-utils
+Requires(post,preun):	rpm-helper
+Requires(preun,postun):	initscripts
 
 %description
 Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
 through NATs" proposed Internet standard (RFC4380). It can serve
 either as a Teredo client, a stand-alone Teredo relay, or a Teredo
-server, please install the miredo-server or miredo-client aproprietly.
+server. Please install the miredo-server or miredo-client appropriately.
 It is meant to provide IPv6 connectivity to hosts behind NAT
 devices, most of which do not support IPv6, and not even
 IPv6-over-IPv4 (including 6to4).
 
-%package -n	%{libname}
-Summary:        Tunneling of IPv6 over UDP through NATs
-Group:          Networking/Other 
+#----------------------------------------------------------------------------
 
-%description -n	%{libname}
+%package -n %{libteredo}
+Summary:	Tunneling of IPv6 over UDP through NATs
+Group:		Networking/Other
+Conflicts:	%{_lib}miredo4 < 1.2.6
+Obsoletes:	%{_lib}miredo4 < 1.2.6
+
+%description -n %{libteredo}
 Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
 through NATs" proposed Internet standard (RFC4380). It can serve
 either as a Teredo client, a stand-alone Teredo relay, or a Teredo
-server, please install the miredo-server or miredo-client aproprietly.
+server. Please install the miredo-server or miredo-client appropriately.
 It is meant to provide IPv6 connectivity to hosts behind NAT
 devices, most of which do not support IPv6, and not even
 IPv6-over-IPv4 (including 6to4).
-This libs package provides the files necessary for both server and client.
 
+%files -n %{libteredo}
+%{_libdir}/libteredo.so.%{major_teredo}*
 
-%package -n	%{develname}
-Summary:        Header files, libraries and development documentation for %{name}
-Group:          Networking/Other 
-Requires:       %{libname} = %{version}-%{release}
+#----------------------------------------------------------------------------
 
-%description -n	%{develname}
+%package -n %{libtun6}
+Summary:	Tunneling of IPv6 over UDP through NATs
+Group:		Networking/Other
+Conflicts:	%{_lib}miredo4 < 1.2.6
+
+%description -n %{libtun6}
+Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
+through NATs" proposed Internet standard (RFC4380). It can serve
+either as a Teredo client, a stand-alone Teredo relay, or a Teredo
+server. Please install the miredo-server or miredo-client appropriately.
+It is meant to provide IPv6 connectivity to hosts behind NAT
+devices, most of which do not support IPv6, and not even
+IPv6-over-IPv4 (including 6to4).
+
+%files -n %{libtun6}
+%{_libdir}/libtun6.so.%{major_tun6}*
+
+#----------------------------------------------------------------------------
+
+%package -n %{devname}
+Summary:	Header files, libraries and development documentation for %{name}
+Group:		Networking/Other
+Requires:	%{libteredo} = %{EVRD}
+Requires:	%{libtun6} = %{EVRD}
+Provides:	%{name}-devel = %{EVRD}
+
+%description -n %{devname}
 This package contains the header files, development libraries and development
 documentation for %{name}. If you would like to develop programs using %{name},
 you will need to install %{name}-devel.
 
-%package server
-Summary:        Tunneling server for IPv6 over UDP through NATs
-Group:          Networking/Other 
-Requires:       %{libname} = %{version}-%{release}
-%description server
-Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
-through NATs" proposed Internet standard (RFC4380). This offers the server 
-part of miredo. Most people will need only the client part.
-
-%package client
-Summary:        Tunneling client for IPv6 over UDP through NATs
-Group:          Networking/Other 
-Requires:       %{libname} = %{version}-%{release}
-Provides:       %{name} = %{version}-%{release}
-Obsoletes:      %{name} <= 1.1.6
-
-
-%description client
-Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
-through NATs" proposed Internet standard (RFC4380). This offers the client
-part of miredo. Most people only need the client part.
-
-%prep
-%setup -q
-%patch0 -p1 
-%patch1 -p1
-
-%build
-%configure \
-               --disable-static \
-               --disable-rpath \
-               --enable-miredo-user \
-
-# rpath does not really work
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-%make
-
-
-%install
-
-%makeinstall_std
-%find_lang %{name}
-mkdir rpmdocs
-mv %{buildroot}%{_docdir}/miredo/examples rpmdocs/
-mkdir -p %{buildroot}%{_initrddir}
-install -p -m 755 %{SOURCE1} %{buildroot}%{_initrddir}/miredo-client
-install -p -m 755 %{SOURCE2} %{buildroot}%{_initrddir}/miredo-server
-rm -f %{buildroot}%{_libdir}/lib*.la
-touch %{buildroot}%{_sysconfdir}/miredo/miredo-server.conf
-mkdir -p %{buildroot}/lib/systemd/systemd/
-cp %{buildroot}/%{_libdir}/systemd/system/%{name}.service %{buildroot}/lib/systemd/systemd/%{name}.service
-
-rm -f %{buildroot}/%{_libdir}/systemd/system/%{name}.service
-
-
-%pre -n %{libname}
-getent group miredo >/dev/null || groupadd -r miredo
-getent passwd miredo >/dev/null || useradd -r -g miredo -d /etc/miredo \
-         -s /sbin/nologin -c "Miredo Daemon" miredo
-exit 0
-
-%post client 
-/sbin/chkconfig --add miredo-client
-
-%post server
-/sbin/chkconfig --add miredo-server
-
-
-%preun client
-if [ $1 = 0 ] ; then
-    /sbin/service miredo-client stop >/dev/null 2>&1
-    /sbin/chkconfig --del miredo-client
-fi
-
-%preun server
-if [ $1 = 0 ] ; then
-    /sbin/service miredo-server stop >/dev/null 2>&1
-    /sbin/chkconfig --del miredo-server
-fi
-
-
-%postun client
-if [ "$1" -ge "1" ] ; then
-    /sbin/service miredo-client condrestart >/dev/null 2>&1 || :
-fi
-
-
-%postun server
-if [ "$1" -ge "1" ] ; then
-    /sbin/service miredo-server condrestart >/dev/null 2>&1 || :
-fi
-
-%files -n %{libname} -f %{name}.lang
-#% doc % {_mandir}/man?/miredo*
-%dir %{_sysconfdir}/miredo
-%{_libdir}/libteredo.so.*
-%{_libdir}/libtun6.so.*
-%{_libdir}/miredo/
-
-%files -n %{develname}
+%files -n %{devname}
 %{_includedir}/libteredo/
 %{_includedir}/libtun6/
 %{_libdir}/libteredo.so
 %{_libdir}/libtun6.so
+
+#----------------------------------------------------------------------------
+
+%package server
+Summary:	Tunneling server for IPv6 over UDP through NATs
+Group:		Networking/Other
+
+%description server
+Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
+through NATs" proposed Internet standard (RFC4380). This offers the server
+part of miredo. Most people will need only the client part.
 
 %files server
 %ghost %config(noreplace,missingok) %{_sysconfdir}/miredo/miredo-server.conf
 %{_bindir}/teredo-mire
 %{_sbindir}/miredo-server
 %{_sbindir}/miredo-checkconf
-%{_initrddir}/miredo-server
-/lib/systemd/systemd/miredo.service
+%{_unitdir}/miredo-server.service
 %doc %{_mandir}/man1/teredo-mire*
 %doc %{_mandir}/man?/miredo-server*
 %doc %{_mandir}/man?/miredo-checkconf*
 
+%preun server
+%_preun_service server
+
+#----------------------------------------------------------------------------
+
+%package client
+Summary:	Tunneling client for IPv6 over UDP through NATs
+Group:		Networking/Other
+Provides:	%{name} = %{EVRD}
+
+%description client
+Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
+through NATs" proposed Internet standard (RFC4380). This offers the client
+part of miredo. Most people only need the client part.
 
 %files client
-%config(noreplace) %{_sysconfdir}/miredo/miredo.conf
-%config(noreplace) %{_sysconfdir}/miredo/client-hook
-%{_initrddir}/miredo-client
 %{_sbindir}/miredo
 %doc %{_mandir}/man?/miredo.*
+%{_unitdir}/miredo-client.service
 
+#----------------------------------------------------------------------------
 
-%changelog
-* Sat Mar 03 2012 Alexander Khrukin <akhrukin@mandriva.org> 1.2.5-1
-+ Revision: 782059
-- version update 1.2.5
+%package common
+Summary:	Tunneling client for IPv6 over UDP through NATs
+Group:		Networking/Other
+Requires:	%{name}-client = %{EVRD}
+Requires:	%{name}-server = %{EVRD}
+Conflicts:	%{_lib}miredo4 < 1.2.6
 
-* Wed Nov 23 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.2.4-2
-+ Revision: 732977
-- release bump
-- mandriva policy fixes
+%description common
+Miredo is an implementation of the "Teredo: Tunneling IPv6 over UDP
+through NATs" proposed Internet standard (RFC4380). This offers the client
+part of miredo. Most people only need the client part.
+Common package, that contains miredo-client and miredo-server
 
-* Tue Nov 01 2011 Alexander Khrukin <akhrukin@mandriva.org> 1.2.4-1
-+ Revision: 709799
-- imported package miredo
+%files common -f %{name}.lang
+%{_unitdir}/miredo.service
+%{_libexecdir}/miredo/
+%dir %{_sysconfdir}/miredo
+%config(noreplace) %{_sysconfdir}/miredo/miredo.conf
+%config(noreplace) %{_sysconfdir}/miredo/client-hook
+
+%pre common
+%_pre_useradd miredo /var/empty /bin/true
+%_post_service client
+%_post_service server
+%_preun_service client
+
+%postun common
+%_postun_userdel miredo
+
+#----------------------------------------------------------------------------
+
+%prep
+%setup -q
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+
+%build
+autoreconf -fi
+%configure2_5x \
+		--disable-static \
+		--disable-rpath \
+		--enable-miredo-user \
+
+# rpath does not really work
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+%make
+
+%install
+%makeinstall_std
+
+%find_lang %{name}
+
+mkdir rpmdocs
+mv %{buildroot}%{_docdir}/miredo/examples rpmdocs/
+mkdir -p %{buildroot}%{_unitdir}
+install -p -m 644 %{SOURCE1} %{buildroot}%{_unitdir}/miredo-client.service
+install -p -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/miredo-server.service
+rm -f %{buildroot}%{_libdir}/lib*.la
+touch %{buildroot}%{_sysconfdir}/miredo/miredo-server.conf
 

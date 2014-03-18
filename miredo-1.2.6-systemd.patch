@@ -1,0 +1,12 @@
+diff -urN miredo-1.2.6/misc/Makefile.am miredo-1.2.6-patched/misc/Makefile.am
+--- miredo-1.2.6/misc/Makefile.am	2012-09-13 00:03:59.000000000 +1100
++++ miredo-1.2.6-patched/misc/Makefile.am	2014-03-19 02:25:53.126385004 +1100
+@@ -18,7 +18,7 @@
+ # ***********************************************************************
+ 
+ confdir = $(sysconfdir)/miredo
+-systemddir = $(libdir)/systemd/system
++systemddir = /lib/systemd/system
+ 
+ MOSTLYCLEANFILES = $(examples_DATA) $(conf_SCRIPTS) $(systemd_DATA)
+ 
