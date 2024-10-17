@@ -10,7 +10,7 @@ Version:	1.2.6
 Release:	2
 License:	GPLv2+
 Group:		Networking/Other
-Url:		http://www.simphalempin.com/dev/miredo/
+Url:		https://www.simphalempin.com/dev/miredo/
 Source0:	http://www.remlab.net/files/miredo/miredo-%{version}.tar.xz
 Source1:	miredo-client.service
 Source2:	miredo-server.service
