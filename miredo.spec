@@ -17,6 +17,11 @@ Source2:	miredo-server.service
 Patch0:		miredo-config-not-exec
 Patch1:		reread-resolv-before-resolv-ipv4.patch
 Patch2:		miredo-1.2.6-systemd.patch
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	gettext-devel
 BuildRequires:	libcap-devel
 
